@@ -1,6 +1,24 @@
 ## Server1 --> server2  --> server3
 ##we can use domain or registerd names also
+
+[servers]
 139.162.156.221
 172.104.235.166
 172.104.148.224
+
+
+[server1]
+139.162.156.221
+
+[server2]
+172.104.235.166
+
+[server3]
+172.104.148.224
+
+
+#create a alias for the host
+host3 ansible_host=172.104.148.224
+
+
 

@@ -1,0 +1,39 @@
+---
+
+- hosts: all
+  become: true
+  pre_tasks:
+
+
+  - name: install updates(Ubuntu)
+    tags: always
+    apt:
+      update_cache: yes
+    changed_when: false
+    when: ansible_distribution == "Ubuntu"
+  
+  - name: install updated(CentOS)
+    tags: always
+    dnf:      
+      update_cache: yes
+    changed_when: false
+    when: ansible_distribution == "CentOS" 
+
+- hosts: servers
+  become: true
+  roles:
+    - keyex
+
+
+- hosts: workstation
+  become: true
+  roles:
+    - workstation
+ 
+
+- hosts: webservers
+  become: true
+  roles:
+    - webserver
+
+

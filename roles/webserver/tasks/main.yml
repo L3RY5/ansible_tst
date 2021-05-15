@@ -1,28 +1,18 @@
-- name: install apache2 and php packages
-  tags: apache2,mod-php,ubuntu
-  apt:
+- name: install apache2 and php packages ubuntu/centOs
+  tags: apache2,httpd,php
+  package:
     name:
-      - apache2
-      - libapache2-mod-php
+      - "{{ apache_package_name }}"
+      - "{{ php_package_name }}"
     state: latest
   when: ansible_distribution == "Ubuntu"
 
-- name: install apache2 and php package in CentOS
-  tags: httpd,php,centOs
-  dnf:
-    name:
-      - httpd
-      - php
-    state: latest
-  when: ansible_distribution == "CentOS"
-
-- name: start httpd(CentOS)
+- name: enable and start apache services
   tags: apache,apache2,httpd
   service:
-      name: httpd
+      name: "{{ apache_service }}"
       state: started
       enabled: yes
-  when: ansible_distribution == "CentOS"
 
 - name: chane email for admin
   tags: apache,apache2,httpd
@@ -31,14 +21,8 @@
     regxp: '^ServerAdmin'
     line: ServerAdmin Someone@hotmail.com
   when: ansible_distribution == "CentOS"
-  register: httpd
+  notify: restart_apache
 
-- name: restart httpd(CentOs)
-  tags: apache,apache2,httpd
-  service:
-    name: httpd
-    state: restarted
-  when: httpd.changed
 
 - name: copy defaullt files to site
   tags: apache2,mod-php,ubuntu,cpFiles

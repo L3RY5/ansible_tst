@@ -8,16 +8,43 @@
   - name: install updates(Ubuntu)
     tags: always
     apt:
-      updrade: dist
       update_cache: yes
+    changed_when: false
     when: ansible_distribution == "Ubuntu"
   
   - name: install updated(CentOS)
     tags: always
-    dnf:
-      update_only: yes      
+    dnf:      
       update_cache: yes
+    changed_when: false
     when: ansible_distribution == "CentOS" 
+
+- hosts: all
+  become: true
+  tasks:
+
+  - name: add ssh key for simone
+    tags: always
+    authorized_key:
+      user: simone
+      key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEC8aw/cvvarHjkoNh4hTEhVHGef9ANMtdnoomOabDq7 Ansible"
+
+- hosts: workstation
+  become: true
+  tasks:
+ 
+  - name: install unzip on work station
+    package:
+      name: unzip
+   
+  - name:  install terraform on worksation
+    unarchive:
+      src: https://releases.hashicorp.com/terraform/0.15.3/terraform_0.15.3_linux_amd64.zip
+      dest: /usr/local/bin
+      remote_src: yes
+      mode: 0755
+      owner: root
+      group: root 
 
 
 - hosts: webservers
@@ -42,6 +69,30 @@
         - php
       state: latest
     when: ansible_distribution == "CentOS"
+
+  - name: start httpd(CentOS)
+    tags: apache,apache2,httpd
+    service: 
+      name: httpd
+      state: started
+      enabled: yes
+    when: ansible_distribution == "CentOS"
+
+  - name: chane email for admin
+    tags: apache,apache2,httpd
+    lineinfile:
+      path: /etc/httpd/conf/httpd.donf
+      regxp: '^ServerAdmin'
+      line: ServerAdmin Someone@hotmail.com
+    when: ansible_distribution == "CentOS" 
+    register: httpd
+
+  - name: restart httpd(CentOs)
+    tags: apache,apache2,httpd
+    service:
+      name: httpd 
+      state: restarted
+    when: httpd.changed
 
   - name: copy defaullt files to site
     tags: apache2,mod-php,ubuntu,cpFiles
